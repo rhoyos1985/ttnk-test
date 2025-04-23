@@ -1,3 +1,4 @@
+import { Order } from "../../enums";
 import { TransactionType } from "../../types";
 
 export interface TransactionDateFilterProps {
@@ -9,7 +10,8 @@ export interface TransactionDateFilterProps {
 }
 
 export interface TransactionListProps extends TransactionSumaryProps {
-  onSort: (field: "date" | "amount") => void;
+  onSortByAmount: (order: Order) => void;
+  onSortByDate: (order: Order) => void;
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;

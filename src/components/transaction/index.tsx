@@ -13,6 +13,7 @@ const TransactionsContainer = styled.div`
 const TransactionsTitle = styled.h1`
   text-align: center;
   font-size: 2rem;
+  color: black;
   margin-bottom: 2rem;
 `;
 
@@ -34,7 +35,8 @@ const TransactionsComponent: React.FC = () => {
     totalPage,
     paginatedTransaction,
     handleTrxFilter,
-    handleTrxSort,
+    sortTransactionDate,
+    sortTransactionAmount,
   } = useTransaction();
 
   return (
@@ -54,7 +56,8 @@ const TransactionsComponent: React.FC = () => {
         currentPage={currentPage}
         totalPages={totalPage}
         onPageChange={setCurrentPage}
-        onSort={handleTrxSort}
+        onSortByDate={sortTransactionDate}
+        onSortByAmount={sortTransactionAmount}
       />
     </TransactionsContainer>
   );

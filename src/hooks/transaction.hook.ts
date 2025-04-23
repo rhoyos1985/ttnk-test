@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { TransactionType } from "../types";
+import { parseLocalDate } from "../utility";
+import { Order } from "../enums";
 
 export const useTransaction = () => {
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
@@ -25,10 +27,8 @@ export const useTransaction = () => {
 
       const response = await fetch(mockApiURL, {
         method: method,
-        cache: "no-cache",
-        credentials: "include",
         headers: {
-          "Content-Type": "application/json",
+          "content-type": "application/json",
         },
       });
 
@@ -49,23 +49,40 @@ export const useTransaction = () => {
     }
     const filtered = transactions.filter((trx: TransactionType) => {
       const txDate = new Date(trx.transactionDate);
-      return txDate >= new Date(startDate) && txDate <= new Date(endDate);
+      const txSimpeDate = new Date(
+        txDate.getFullYear(),
+        txDate.getMonth(),
+        txDate.getDate(),
+      );
+      const filterStartDate = parseLocalDate(startDate);
+      const filterEndDate = parseLocalDate(endDate);
+      return txSimpeDate >= filterStartDate && txSimpeDate <= filterEndDate;
     });
     setFilteredTransactions(filtered);
     setCurrentPage(1);
   };
 
-  const handleTrxSort = (field: "date" | "amount") => {
+  const sortTransactionDate = (order: Order) => {
+    const sortedTransactionsDate = [...filteredTransactions].sort(
+      (a: TransactionType, b: TransactionType) => {
+        const dateA = new Date(a.transactionDate);
+        const dateB = new Date(b.transactionDate);
+
+        if (order === Order.ASC) return dateA.getTime() - dateB.getTime();
+        else return dateB.getTime() - dateA.getTime();
+      },
+    );
+    setFilteredTransactions(sortedTransactionsDate);
+  };
+
+  const sortTransactionAmount = (order: Order) => {
     const sorted = [...filteredTransactions].sort(
       (a: TransactionType, b: TransactionType) => {
-        if (field === "date") {
-          return (
-            new Date(a.transactionDate).getTime() -
-            new Date(b.transactionDate).getTime()
-          );
-        } else {
-          return a.amount - b.amount;
-        }
+        const amountA = parseFloat(a.amount);
+        const amountB = parseFloat(b.amount);
+
+        if (order === Order.ASC) return amountA - amountB;
+        else return amountB - amountA;
       },
     );
     setFilteredTransactions(sorted);
@@ -90,7 +107,7 @@ export const useTransaction = () => {
       currentPage * ITEMS_PER_PAGE,
     );
     setPaginatedTransaction(paginateTrx);
-  }, [currentPage]);
+  }, [currentPage, filteredTransactions]);
 
   return {
     filteredTransactions,
@@ -104,6 +121,7 @@ export const useTransaction = () => {
     totalPage,
     paginatedTransaction,
     handleTrxFilter,
-    handleTrxSort,
+    sortTransactionAmount,
+    sortTransactionDate,
   };
 };
